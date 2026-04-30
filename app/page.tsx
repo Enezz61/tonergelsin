@@ -1,65 +1,136 @@
-import Image from "next/image";
+import Footer from "@/components/Footer";
+import Hero from "@/components/Hero";
+import Navbar from "@/components/Navbar";
+import ProductCard from "@/components/ProductCard";
+import { getProductOptions, getProducts } from "@/lib/products";
+import Link from "next/link";
 
-export default function Home() {
+export const dynamic = "force-dynamic";
+
+export default async function HomePage() {
+  const [products, options] = await Promise.all([getProducts(), getProductOptions()]);
+  const featuredProducts = products.slice(0, 6);
+  const latestProduct = products[0];
+  const inStockCount = products.filter(
+    (product) => typeof product.stock === "number" && product.stock > 0
+  ).length;
+
+  const stats = [
+    {
+      title: "Katalogdaki Ürün",
+      value: products.length.toString(),
+      text: "Ürün bilgileri doğrudan veri tabanından alınır.",
+    },
+    {
+      title: "Kategori",
+      value: options.categories.length.toString(),
+      text:
+        options.categories.length > 0
+          ? options.categories.slice(0, 3).join(", ")
+          : "Henüz kategori yok.",
+    },
+    {
+      title: "Stoktaki Ürün",
+      value: inStockCount.toString(),
+      text: latestProduct ? `Son eklenen: ${latestProduct.name}` : "Admin panelinden ürün ekleyin.",
+    },
+  ];
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+    <main className="min-h-screen bg-stone-50 text-slate-900">
+      <Navbar />
+      <Hero
+        productCount={products.length}
+        categories={options.categories}
+        latestProductName={latestProduct?.name}
+      />
+
+      <section className="mx-auto grid max-w-7xl gap-5 px-6 py-10 md:grid-cols-3">
+        {stats.map((stat) => (
+          <div key={stat.title} className="rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
+            <p className="text-sm font-bold uppercase tracking-wide text-orange-600">
+              {stat.title}
+            </p>
+            <h2 className="mt-3 break-words text-3xl font-black text-slate-950">
+              {stat.value}
+            </h2>
+            <p className="mt-2 leading-7 text-slate-600">{stat.text}</p>
+          </div>
+        ))}
+      </section>
+
+      <section className="mx-auto max-w-7xl px-6 pb-16">
+        <div className="mb-9 flex flex-wrap items-end justify-between gap-4">
+          <div>
+            <p className="text-sm font-bold uppercase tracking-wide text-orange-600">
+              Veri tabanından gelen ürünler
+            </p>
+            <h2 className="mt-2 text-3xl font-black text-slate-950">
+              Son eklenen toner ve kartuşlar
+            </h2>
+            <p className="mt-3 max-w-2xl text-slate-600">
+              Ana sayfadaki ürünler admin panelinde eklediğiniz canlı katalogdan otomatik alınır.
+            </p>
+          </div>
+
+          <Link
+            href="/products"
+            className="rounded-lg border border-slate-300 bg-white px-5 py-3 font-bold text-slate-900 transition hover:border-orange-300 hover:text-orange-600"
           >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+            Tüm Ürünleri Gör
+          </Link>
         </div>
-      </main>
-    </div>
+
+        {featuredProducts.length > 0 ? (
+          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {featuredProducts.map((product) => (
+              <ProductCard key={product._id} product={product} />
+            ))}
+          </div>
+        ) : (
+          <div className="rounded-lg border border-dashed border-slate-300 bg-white p-10 text-center">
+            <h3 className="text-xl font-black text-slate-950">Henüz ürün eklenmemiş</h3>
+            <p className="mt-2 text-slate-600">
+              Admin panelinden ürün eklediğinizde burada görünecek.
+            </p>
+          </div>
+        )}
+      </section>
+
+      <section className="border-y border-slate-200 bg-white">
+        <div className="mx-auto grid max-w-7xl gap-6 px-6 py-12 lg:grid-cols-[0.9fr_1.1fr]">
+          <div>
+            <p className="text-sm font-bold uppercase tracking-wide text-orange-600">
+              Hızlı seçim
+            </p>
+            <h2 className="mt-2 text-3xl font-black text-slate-950">
+              Markaya ve kategoriye göre ürün bulun.
+            </h2>
+            <p className="mt-3 leading-8 text-slate-600">
+              Admin panelinde girilen marka, kategori ve uyumlu yazıcı modeli bilgileri ürün aramasında kullanılır.
+            </p>
+          </div>
+
+          <div className="grid gap-3 sm:grid-cols-2">
+            {options.categories.slice(0, 6).map((category) => (
+              <Link
+                key={category}
+                href={`/products?category=${encodeURIComponent(category)}`}
+                className="rounded-lg border border-slate-200 p-4 font-bold text-slate-900 hover:border-orange-300 hover:text-orange-600"
+              >
+                {category}
+              </Link>
+            ))}
+            {options.categories.length === 0 && (
+              <p className="rounded-lg border border-dashed border-slate-300 p-5 text-slate-600">
+                Kategoriler ürün ekledikçe otomatik görünür.
+              </p>
+            )}
+          </div>
+        </div>
+      </section>
+
+      <Footer />
+    </main>
   );
 }
