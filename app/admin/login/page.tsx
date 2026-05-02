@@ -5,7 +5,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 
 export default function AdminLogin() {
-  const [username, setUsername] = useState(process.env.NEXT_PUBLIC_ADMIN_USER || "");
+  const [username, setUsername] = useState(""); // ❗ ENV kaldırıldı
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const router = useRouter();
@@ -22,14 +22,14 @@ export default function AdminLogin() {
         body: JSON.stringify({ username, password }),
       });
 
-      const data = (await res.json()) as { token?: string; message?: string };
+      const data = await res.json();
 
-      if (!res.ok || !data.token) {
+      if (!res.ok) {
         alert(data.message || "Hatalı giriş");
         return;
       }
 
-      localStorage.setItem("admin_token", data.token);
+      // ❗ artık token saklama yok (cookie kullanıyoruz)
       router.push("/admin");
     } catch (err) {
       console.error(err);
@@ -68,14 +68,14 @@ export default function AdminLogin() {
               placeholder="Kullanıcı adı"
               className={inputClass}
               value={username}
-              onChange={(event) => setUsername(event.target.value)}
+              onChange={(e) => setUsername(e.target.value)}
             />
             <input
               type="password"
               placeholder="Şifre"
               className={inputClass}
               value={password}
-              onChange={(event) => setPassword(event.target.value)}
+              onChange={(e) => setPassword(e.target.value)}
             />
             <button
               onClick={login}

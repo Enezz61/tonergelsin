@@ -1,52 +1,50 @@
 import { NextResponse } from "next/server";
-import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 
 export async function POST(req: Request) {
   try {
     const { username, password } = await req.json();
 
+    const ADMIN_USER = process.env.ADMIN_USER;
+    const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;
+    const JWT_SECRET = process.env.JWT_SECRET;
 
-    // ENV değerleri
-    const ADMIN_USER = process.env.ADMIN_USER!;
-    const ADMIN_HASH = process.env.ADMIN_HASH!;
-    const JWT_SECRET = process.env.JWT_SECRET!;
-
-    // Kullanıcı kontrolü
-    if (username !== ADMIN_USER) {
-      return NextResponse.json({ message: "Hatalı giriş" }, { status: 401 });
-
- 
+    if (!ADMIN_USER || !ADMIN_PASSWORD || !JWT_SECRET) {
+      return NextResponse.json(
+        { message: "ENV eksik" },
+        { status: 500 }
+      );
     }
 
-    // Şifre hash karşılaştırma
-    const isValid = await bcrypt.compare(password, ADMIN_HASH);
-
-    if (!isValid) {
-      return NextResponse.json({ message: "Hatalı giriş" }, { status: 401 });
+    if (username !== ADMIN_USER || password !== ADMIN_PASSWORD) {
+      return NextResponse.json(
+        { message: "Hatalı giriş" },
+        { status: 401 }
+      );
     }
 
-    // JWT üret
+    // 🔐 JWT oluştur
     const token = jwt.sign(
-      { role: "admin", username },
+      { role: "admin" },
       JWT_SECRET,
-      { expiresIn: "1h" }
+      { expiresIn: "7d" }
     );
 
-    // Cookie set (EN ÖNEMLİ)
-    const response = NextResponse.json({ success: true });
+    const res = NextResponse.json({ success: true });
 
-    response.cookies.set("admin_token", token, {
+    // 🍪 COOKIE set
+    res.cookies.set("admin_token", token, {
       httpOnly: true,
-      secure: true, // productionda true olmalı
-      sameSite: "strict",
+      secure: true,
       path: "/",
-      maxAge: 60 * 60, // 1 saat
+      maxAge: 60 * 60 * 24 * 7, // 7 gün
     });
 
-    return response;
-  } catch (error) {
-    console.error(error);
-    return NextResponse.json({ message: "Sunucu hatası" }, { status: 500 });
+    return res;
+  } catch {
+    return NextResponse.json(
+      { message: "Sunucu hatası" },
+      { status: 500 }
+    );
   }
 }

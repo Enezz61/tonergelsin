@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
 type AdminProduct = {
@@ -55,11 +55,6 @@ export default function AdminPage() {
   const [editProduct, setEditProduct] = useState<AdminProduct | null>(null);
   const router = useRouter();
 
-  const token = useMemo(() => {
-    if (typeof window === "undefined") return null;
-    return localStorage.getItem("admin_token");
-  }, []);
-
   const fetchProducts = async () => {
     setLoading(true);
     const res = await fetch("/api/products");
@@ -69,11 +64,6 @@ export default function AdminPage() {
   };
 
   useEffect(() => {
-    if (!token) {
-      router.replace("/admin/login");
-      return;
-    }
-
     let active = true;
 
     fetch("/api/products")
@@ -89,7 +79,7 @@ export default function AdminPage() {
     return () => {
       active = false;
     };
-  }, [router, token]);
+  }, []);
 
   const inputClass =
     "w-full rounded-lg border border-slate-300 bg-white px-4 py-3 text-slate-900 transition placeholder:text-slate-400 focus:border-orange-400 focus:ring-2 focus:ring-orange-100";
@@ -106,9 +96,6 @@ export default function AdminPage() {
     try {
       const res = await fetch("/api/upload", {
         method: "POST",
-        headers: {
-          Authorization: `Bearer ${token || ""}`,
-        },
         body,
       });
       const data = (await res.json()) as UploadResponse;
@@ -141,9 +128,6 @@ export default function AdminPage() {
     try {
       const res = await fetch("/api/products/import", {
         method: "POST",
-        headers: {
-          Authorization: `Bearer ${token || ""}`,
-        },
         body,
       });
       const data = (await res.json()) as ImportResponse;
@@ -165,7 +149,6 @@ export default function AdminPage() {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${token || ""}`,
       },
       body: JSON.stringify(form),
     });
@@ -184,9 +167,6 @@ export default function AdminPage() {
 
     await fetch(`/api/products/${product._id}`, {
       method: "DELETE",
-      headers: {
-        Authorization: `Bearer ${token || ""}`,
-      },
     });
 
     fetchProducts();
@@ -200,7 +180,6 @@ export default function AdminPage() {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${token || ""}`,
       },
       body: JSON.stringify(editProduct),
     });
