@@ -1,13 +1,8 @@
 import { getProducts } from "@/lib/products";
 import { connectDB } from "@/lib/db";
-import Product from "@/models/Product";
-import { slugify } from "@/lib/slugify";
+import { isAdminAuthorized } from "@/lib/adminAuth";
+import { createProduct } from "@/lib/productMutations";
 import { NextResponse } from "next/server";
-
-function isAuthorized(req: Request) {
-  const expectedToken = process.env.ADMIN_TOKEN ?? "admin-token-123";
-  return req.headers.get("authorization") === `Bearer ${expectedToken}`;
-}
 
 export async function GET() {
   try {
@@ -22,7 +17,7 @@ export async function GET() {
 }
 
 export async function POST(req: Request) {
-  if (!isAuthorized(req)) {
+  if (!isAdminAuthorized(req)) {
     return NextResponse.json({ message: "Yetkisiz işlem" }, { status: 401 });
   }
 
@@ -30,36 +25,7 @@ export async function POST(req: Request) {
     await connectDB();
 
     const body = await req.json();
-    const name = body.name?.trim();
-    const price = body.price;
-
-    if (!name || !price) {
-      return NextResponse.json(
-        { message: "Ürün adı ve fiyat zorunludur." },
-        { status: 400 }
-      );
-    }
-
-    const baseSlug = slugify(name);
-    let slug = baseSlug;
-    let counter = 1;
-
-    while (await Product.findOne({ slug })) {
-      slug = `${baseSlug}-${counter}`;
-      counter++;
-    }
-
-    const product = await Product.create({
-      name,
-      price,
-      image: body.image || "/images/yazıcıhp.png",
-      description: body.description || "",
-      category: body.category || "Genel",
-      brand: body.brand || "",
-      printerModels: body.printerModels || "",
-      stock: Number(body.stock || 0),
-      slug,
-    });
+    const product = await createProduct(body);
 
     return NextResponse.json(
       {
@@ -68,10 +34,13 @@ export async function POST(req: Request) {
       },
       { status: 201 }
     );
-  } catch {
+  } catch (error) {
     return NextResponse.json(
-      { message: "Ürün eklenemedi" },
-      { status: 500 }
+      {
+        message:
+          error instanceof Error ? error.message : "Ürün eklenemedi",
+      },
+      { status: error instanceof Error ? 400 : 500 }
     );
   }
 }

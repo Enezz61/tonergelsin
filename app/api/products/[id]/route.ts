@@ -1,18 +1,14 @@
 import { connectDB } from "@/lib/db";
-import { slugify } from "@/lib/slugify";
+import { isAdminAuthorized } from "@/lib/adminAuth";
+import { updateProduct } from "@/lib/productMutations";
 import Product from "@/models/Product";
 import { NextResponse } from "next/server";
-
-function isAuthorized(req: Request) {
-  const expectedToken = process.env.ADMIN_TOKEN ?? "admin-token-123";
-  return req.headers.get("authorization") === `Bearer ${expectedToken}`;
-}
 
 export async function PUT(
   req: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  if (!isAuthorized(req)) {
+  if (!isAdminAuthorized(req)) {
     return NextResponse.json({ message: "Yetkisiz işlem" }, { status: 401 });
   }
 
@@ -21,43 +17,25 @@ export async function PUT(
 
     const { id } = await params;
     const body = await req.json();
-    const name = body.name?.trim();
-
-    if (!name || !body.price) {
-      return NextResponse.json(
-        { message: "Ürün adı ve fiyat zorunludur." },
-        { status: 400 }
-      );
-    }
-
     const product = await Product.findById(id);
 
     if (!product) {
       return NextResponse.json({ message: "Ürün bulunamadı" }, { status: 404 });
     }
 
-    const nextSlug = product.name === name ? product.slug : slugify(name);
-
-    product.name = name;
-    product.price = body.price;
-    product.image = body.image || "/images/yazıcıhp.png";
-    product.description = body.description || "";
-    product.category = body.category || "Genel";
-    product.brand = body.brand || "";
-    product.printerModels = body.printerModels || "";
-    product.stock = Number(body.stock || 0);
-    product.slug = nextSlug;
-
-    await product.save();
+    const updatedProduct = await updateProduct(product, body);
 
     return NextResponse.json({
       message: "Ürün güncellendi",
-      product,
+      product: updatedProduct,
     });
-  } catch {
+  } catch (error) {
     return NextResponse.json(
-      { message: "Ürün güncellenemedi" },
-      { status: 500 }
+      {
+        message:
+          error instanceof Error ? error.message : "Ürün güncellenemedi",
+      },
+      { status: error instanceof Error ? 400 : 500 }
     );
   }
 }
@@ -66,7 +44,7 @@ export async function DELETE(
   req: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  if (!isAuthorized(req)) {
+  if (!isAdminAuthorized(req)) {
     return NextResponse.json({ message: "Yetkisiz işlem" }, { status: 401 });
   }
 

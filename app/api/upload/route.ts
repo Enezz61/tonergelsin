@@ -1,24 +1,11 @@
-import { randomUUID } from "crypto";
-import { mkdir, writeFile } from "fs/promises";
-import path from "path";
+import { isAdminAuthorized } from "@/lib/adminAuth";
+import { uploadProductImage } from "@/lib/uploadStorage";
 import { NextResponse } from "next/server";
 
 export const runtime = "nodejs";
 
-const allowedTypes = new Map([
-  ["image/jpeg", "jpg"],
-  ["image/png", "png"],
-  ["image/webp", "webp"],
-  ["image/gif", "gif"],
-]);
-
-function isAuthorized(req: Request) {
-  const expectedToken = process.env.ADMIN_TOKEN ?? "admin-token-123";
-  return req.headers.get("authorization") === `Bearer ${expectedToken}`;
-}
-
 export async function POST(req: Request) {
-  if (!isAuthorized(req)) {
+  if (!isAdminAuthorized(req)) {
     return NextResponse.json({ message: "Yetkisiz işlem" }, { status: 401 });
   }
 
@@ -33,35 +20,22 @@ export async function POST(req: Request) {
       );
     }
 
-    const extension = allowedTypes.get(file.type);
+    const upload = await uploadProductImage(file);
 
-    if (!extension) {
-      return NextResponse.json(
-        { message: "Sadece JPG, PNG, WEBP veya GIF yükleyebilirsiniz" },
-        { status: 400 }
-      );
+    if (!upload.ok) {
+      return NextResponse.json({ message: upload.message }, { status: 400 });
     }
-
-    if (file.size > 5 * 1024 * 1024) {
-      return NextResponse.json(
-        { message: "Görsel 5 MB'den küçük olmalıdır" },
-        { status: 400 }
-      );
-    }
-
-    const uploadsDir = path.join(process.cwd(), "public", "uploads");
-    await mkdir(uploadsDir, { recursive: true });
-
-    const fileName = `${Date.now()}-${randomUUID()}.${extension}`;
-    const filePath = path.join(uploadsDir, fileName);
-    const bytes = Buffer.from(await file.arrayBuffer());
-
-    await writeFile(filePath, bytes);
 
     return NextResponse.json({
-      url: `/uploads/${fileName}`,
+      url: upload.url,
     });
-  } catch {
-    return NextResponse.json({ message: "Görsel yüklenemedi" }, { status: 500 });
+  } catch (error) {
+    return NextResponse.json(
+      {
+        message:
+          error instanceof Error ? error.message : "Görsel yüklenemedi",
+      },
+      { status: 500 }
+    );
   }
 }

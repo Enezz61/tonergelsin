@@ -6,6 +6,7 @@ export async function POST(req: Request) {
   try {
     const { username, password } = await req.json();
 
+
     // ENV değerleri
     const ADMIN_USER = process.env.ADMIN_USER!;
     const ADMIN_HASH = process.env.ADMIN_HASH!;
@@ -14,6 +15,8 @@ export async function POST(req: Request) {
     // Kullanıcı kontrolü
     if (username !== ADMIN_USER) {
       return NextResponse.json({ message: "Hatalı giriş" }, { status: 401 });
+
+ 
     }
 
     // Şifre hash karşılaştırma

@@ -1,10 +1,11 @@
 "use client";
 
+import Logo from "@/components/Logo";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 
 export default function AdminLogin() {
-  const [username, setUsername] = useState("");
+  const [username, setUsername] = useState(process.env.NEXT_PUBLIC_ADMIN_USER || "");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const router = useRouter();
@@ -45,9 +46,7 @@ export default function AdminLogin() {
     <main className="grid min-h-screen bg-slate-950 text-white lg:grid-cols-[1fr_460px]">
       <section className="hidden items-center px-12 lg:flex">
         <div className="max-w-2xl">
-          <p className="text-sm font-bold uppercase tracking-wide text-orange-300">
-            TonerGelsin yönetim
-          </p>
+          <Logo className="text-white" />
           <h1 className="mt-4 text-5xl font-black leading-tight">
             Ürün kataloğunu hızlıca yönetin.
           </h1>
