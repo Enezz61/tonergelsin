@@ -55,6 +55,11 @@ export default function AdminPage() {
   const [editProduct, setEditProduct] = useState<AdminProduct | null>(null);
   const router = useRouter();
 
+  const logout = async () => {
+    await fetch("/api/admin/login/logout", { method: "POST" });
+    router.push("/admin/login");
+  };
+
   const fetchProducts = async () => {
     setLoading(true);
     const res = await fetch("/api/products");
@@ -201,6 +206,12 @@ export default function AdminPage() {
             <p className="mt-3 text-slate-300">
               Katalog ürünlerini ekleyin, düzenleyin ve yayından kaldırın.
             </p>
+            <button
+              onClick={logout}
+              className="mt-4 rounded-lg bg-red-600 px-4 py-2 font-bold text-white transition hover:bg-red-700"
+            >
+              Çıkış Yap
+            </button>
           </div>
           <div className="rounded-lg bg-white/10 px-5 py-3">
             <p className="text-sm text-slate-300">Toplam ürün</p>

@@ -27,7 +27,7 @@ export async function POST(req: Request) {
     const token = jwt.sign(
       { role: "admin" },
       JWT_SECRET,
-      { expiresIn: "7d" }
+      { expiresIn: "1h" }
     );
 
     const res = NextResponse.json({ success: true });
@@ -37,7 +37,7 @@ export async function POST(req: Request) {
       httpOnly: true,
       secure: true,
       path: "/",
-      maxAge: 60 * 60 * 24 * 7, // 7 gün
+      maxAge: 60 * 60, // 1 saat
     });
 
     return res;
