@@ -1,6 +1,6 @@
 "use client";
 
-const phone = process.env.NEXT_PUBLIC_WHATSAPP_PHONE || "905XXXXXXXXX";
+const phone = process.env.NEXT_PUBLIC_WHATSAPP_PHONE || "905423584852";
 
 export default function WhatsAppFloating() {
   const message = "Merhaba, toner ve kartuş ürünleri hakkında bilgi almak istiyorum.";
