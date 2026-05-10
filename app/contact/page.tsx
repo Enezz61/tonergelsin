@@ -4,7 +4,7 @@ import Footer from "@/components/Footer";
 import Navbar from "@/components/Navbar";
 import { useState } from "react";
 
-const phone = process.env.NEXT_PUBLIC_WHATSAPP_PHONE || "905XXXXXXXXX";
+const phone = process.env.NEXT_PUBLIC_WHATSAPP_PHONE || "905423584852";
 
 export default function ContactPage() {
   const [form, setForm] = useState({
