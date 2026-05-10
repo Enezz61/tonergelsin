@@ -5,7 +5,7 @@ type OrderProduct = {
   price: string | number;
 };
 
-const phone = process.env.NEXT_PUBLIC_WHATSAPP_PHONE || "905XXXXXXXXX";
+const phone = process.env.NEXT_PUBLIC_WHATSAPP_PHONE || "905423584852";
 
 export default function OrderButton({ product }: { product: OrderProduct }) {
   const sendWhatsApp = () => {
