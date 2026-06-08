@@ -33,9 +33,7 @@ export default function Hero({
             Toner ve kartuşta hızlı, net ve güvenilir çözüm.
           </h1>
 
-          <p className="mt-5 max-w-2xl text-base leading-8 text-slate-200 sm:text-lg">
-            Katalogdaki ürünler, fiyatlar ve kategoriler admin panelinden yönetilen veri tabanından gelir.
-          </p>
+
 
           <div className="mt-8 flex flex-col gap-3 sm:flex-row">
             <Link
