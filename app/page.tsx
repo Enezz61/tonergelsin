@@ -19,7 +19,7 @@ export default async function HomePage() {
     {
       title: "Katalogdaki Ürün",
       value: products.length.toString(),
-      text: "Ürün bilgileri doğrudan veri tabanından alınır.",
+      text: "",
     },
     {
       title: "Kategori",
@@ -63,13 +63,13 @@ export default async function HomePage() {
         <div className="mb-9 flex flex-wrap items-end justify-between gap-4">
           <div>
             <p className="text-sm font-bold uppercase tracking-wide text-orange-600">
-              Veri tabanından gelen ürünler
+              Ürünler
             </p>
             <h2 className="mt-2 text-3xl font-black text-slate-950">
               Son eklenen toner ve kartuşlar
             </h2>
             <p className="mt-3 max-w-2xl text-slate-600">
-              Ana sayfadaki ürünler admin panelinde eklediğiniz canlı katalogdan otomatik alınır.
+             
             </p>
           </div>
 
@@ -91,7 +91,7 @@ export default async function HomePage() {
           <div className="rounded-lg border border-dashed border-slate-300 bg-white p-10 text-center">
             <h3 className="text-xl font-black text-slate-950">Henüz ürün eklenmemiş</h3>
             <p className="mt-2 text-slate-600">
-              Admin panelinden ürün eklediğinizde burada görünecek.
+           
             </p>
           </div>
         )}
@@ -107,7 +107,7 @@ export default async function HomePage() {
               Markaya ve kategoriye göre ürün bulun.
             </h2>
             <p className="mt-3 leading-8 text-slate-600">
-              Admin panelinde girilen marka, kategori ve uyumlu yazıcı modeli bilgileri ürün aramasında kullanılır.
+              Marka, kategori ve uyumlu yazıcı modeli bilgileri ürün aramasında kullanılır.
             </p>
           </div>
 
