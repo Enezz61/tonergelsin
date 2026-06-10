@@ -12,7 +12,7 @@ export default function Logo({
   return (
     <span className={`inline-flex items-center gap-2 ${className}`}>
       <Image
-        src="/logo.png"
+        src="/logotoner.png"
         alt="TonerGelsin"
         width={42}
         height={42}
